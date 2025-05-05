@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta CNPJ</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f7f7f7;
+    }
+
+    h3 {
+      color: #333;
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    #form-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      font-weight: bold;
+      color: #333;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    button {
+      flex: 1;
+      margin: 0 5px;
+      /* Espaço entre os botões */
+      padding: 12px;
+      background-color: #28a745;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    #loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    #loading .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top: 4px solid #007bff;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    #dados {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .linha {
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .linha .label {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .linha span {
+      color: #555;
+    }
+
+    /* Mensagem de feedback */
+    #feedback {
+      color: red;
+      display: none;
+    }
+
+    /* Responsividade */
+    @media (max-width: 600px) {
+      .linha {
+        flex-direction: column;
+      }
+
+      .linha .label {
+        margin-bottom: 5px;
+      }
+
+      .button-container {
+        flex-direction: column;
+      }
+
+      button {
+        margin: 5px 0;
+        /* Espaço vertical entre botões em telas pequenas */
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="form-container">
+    <h3>Consultar CNPJ</h3>
+    <label for="input-cnpj">Digite o CNPJ:</label> <!-- Alterado o ID para "input-cnpj" -->
+    <input type="text" id="input-cnpj" placeholder="00.000.000/0001-91" />
+
+    <div class="button-container">
+      <button onclick="buscarDados()">Buscar</button>
+      <button onclick="copiarDados()">Copiar Dados</button>
+      <button onclick="limparCampos()">Limpar</button>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading">
+      <div class="spinner"></div>
+      <p>Buscando dados...</p>
+    </div>
+
+    <!-- Mensagem de Feedback -->
+    <div id="feedback"></div>
+
+    <!-- Dados do CNPJ -->
+    <div id="dados">
+
+      <div class="linha"><span class="label">Nome:</span> <span id="nome"></span></div>
+      <div class="linha"><span class="label">Fantasia:</span> <span id="fantasia"></span></div>
+      <div class="linha"><span class="label">UF:</span> <span id="uf"></span></div>
+      <div class="linha"><span class="label">Telefone:</span> <span id="telefone"></span></div>
+      <div class="linha"><span class="label">E-mail:</span> <span id="email"></span></div>
+      <div class="linha"><span class="label">Atividade Principal:</span> <span id="atividade"></span></div>
+      <div class="linha"><span class="label">Situação:</span> <span id="situacao"></span></div>
+      <div class="linha"><span class="label">Logradouro:</span> <span id="logradouro"></span></div>
+      <div class="linha"><span class="label">Número:</span> <span id="numero"></span></div>
+      <div class="linha"><span class="label">Bairro:</span> <span id="bairro"></span></div>
+      <div class="linha"><span class="label">Município:</span> <span id="municipio"></span></div>
+      <div class="linha"><span class="label">Capital Social:</span> <span id="capital"></span></div>
+      <div class="linha"><span class="label">CNPJ:</span> <span id="cnpj"></span></div> <!-- cnpj para exibição -->
+      <div class="linha"><span class="label">Complemento:</span> <span id="complemento"></span></div>
+      <!-- complemento para exibição -->
+    </div>
+    <button id="btnFechar" onclick="google.script.host.close()">Fechar</button>
+  </div>
+
+  <script>
+    function buscarDados() {
+      var cnpj = document.getElementById('input-cnpj').value;  // Corrigido para o novo ID
+      if (!validarCNPJ(cnpj)) {
+        alert('Por favor, insira um CNPJ válido.');
+        return;
+      }
+
+      // Exibe o feedback de carregamento
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('dados').style.display = 'none';
+      document.getElementById('feedback').style.display = 'none';
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          document.getElementById('loading').style.display = 'none';
+
+          // Verifica se houve algum erro no retorno
+          if (response[0].startsWith('Erro') || response[0] === 'CNPJ inválido') {
+            document.getElementById('feedback').textContent = response[0];
+            document.getElementById('feedback').style.display = 'block';
+            return;
+          }
+
+          // Exibe os dados na interface
+          preencherDados(response);
+        })
+        .preencherDadosCNPJ(cnpj);  // Chama a função no Apps Script para buscar e preencher os dados
+    }
+
+    function validarCNPJ(cnpj) {
+      cnpj = cnpj.replace(/[^\d]/g, '');
+      return cnpj.length === 14;  // Simples validação de comprimento
+    }
+
+    function preencherDados(response) {
+  document.getElementById('nome').textContent = response[0];
+  document.getElementById('fantasia').textContent = response[1];
+  document.getElementById('uf').textContent = response[2];
+  document.getElementById('telefone').textContent = response[3];
+  document.getElementById('email').textContent = response[4];
+  document.getElementById('atividade').textContent = response[5];
+  document.getElementById('situacao').textContent = response[6];
+  document.getElementById('logradouro').textContent = response[7];
+  document.getElementById('numero').textContent = response[8];
+  document.getElementById('complemento').textContent = response[9]; // Ajustado para o complemento
+  document.getElementById('bairro').textContent = response[10];
+  document.getElementById('municipio').textContent = response[11];
+  document.getElementById('capital').textContent = response[12];
+  document.getElementById('cnpj').textContent = response[13];
+
+  document.getElementById('dados').style.display = 'block';  // Exibe o bloco de dados
+}
+
+
+    function copiarDados() {
+      var dadosTexto = `
+        Nome: ${document.getElementById('nome').textContent}
+        Fantasia: ${document.getElementById('fantasia').textContent}
+        UF: ${document.getElementById('uf').textContent}
+        Telefone: ${document.getElementById('telefone').textContent}
+        E-mail: ${document.getElementById('email').textContent}
+        Atividade Principal: ${document.getElementById('atividade').textContent}
+        Situação: ${document.getElementById('situacao').textContent}
+        Logradouro: ${document.getElementById('logradouro').textContent}
+        Número: ${document.getElementById('numero').textContent}
+        Complemento: ${document.getElementById('complemento').textContent}
+        Bairro: ${document.getElementById('bairro').textContent}
+        Município: ${document.getElementById('municipio').textContent}
+        Capital Social: ${document.getElementById('capital').textContent}
+        CNPJ: ${document.getElementById('cnpj').textContent}
+        
+
+
+        
+      `;
+
+      navigator.clipboard.writeText(dadosTexto.trim()).then(function() {
+        alert('Dados copiados para a área de transferência!');
+      }, function(err) {
+        console.error('Erro ao copiar: ', err);
+      });
+    }
+
+    function limparCampos() {
+      document.getElementById('input-cnpj').value = '';  // Limpa o campo de entrada do CNPJ
+      document.getElementById('dados').style.display = 'none';
+      document.getElementById('feedback').style.display = 'none';
+      document.getElementById('loading').style.display = 'none';
+      // Limpa todos os campos de dados
+      Array.from(document.querySelectorAll('#dados span')).forEach(span => span.textContent = '');
+    }
+  </script>
+</body>
+
+</html>

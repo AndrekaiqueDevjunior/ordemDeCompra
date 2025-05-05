@@ -1,0 +1,47 @@
+{
+  "timeZone": "America/Sao_Paulo",
+  "dependencies": {
+  },
+  "webapp": {
+    "access": "MYSELF",
+    "executeAs": "USER_DEPLOYING"
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "sheets": {
+    "macros": [{
+      "menuName": "recolher GRUPO ",
+      "functionName": "recolherGRUPO"
+    }, {
+      "menuName": "recolherGrupoS",
+      "functionName": "recolherGrupoS"
+    }, {
+      "menuName": "OCULTAR produtos",
+      "functionName": "OCULTARprodutos"
+    }, {
+      "menuName": "recolherGrupoAteColuna(S)",
+      "functionName": "myFunction"
+    }, {
+      "menuName": "selecionarEMpresa",
+      "functionName": "selecionarEMpresa"
+    }, {
+      "menuName": "liberarGrupo",
+      "functionName": "liberarGrupo"
+    }, {
+      "menuName": "trocandoPagina",
+      "functionName": "trocandoPagina"
+    }, {
+      "menuName": "recolherGrupoT",
+      "functionName": "recolherGrupoT"
+    }, {
+      "menuName": "liberarGrupoU",
+      "functionName": "liberarGrupoU"
+    }, {
+      "menuName": "recolhercolunaS",
+      "functionName": "recolhercolunaS"
+    }, {
+      "menuName": "liberarGrupoS",
+      "functionName": "liberarGrupoS"
+    }]
+  }
+}
